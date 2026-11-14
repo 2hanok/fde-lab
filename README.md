@@ -1,3 +1,5 @@
+사이트: https://2hanok.github.io/fde-lab/
+
 # 체중 감량과 어깨·등 풀기 운동 루틴 — 주경야독 2026 개인 학습 프로젝트
 
 사이트: https://2hanok.github.io/fde-lab/
