@@ -4,9 +4,69 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>체중 감량과 어깨·등 풀기 운동 루틴 — 주경야독 2026</title>
+<style>
+body{font-family:sans-serif;max-width:760px;margin:24px auto;padding:0 12px;line-height:1.5}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}
+th{background:#f2f2f2}
+.note{background:#fff7d6;border:1px solid #e6d27a;padding:8px 10px;margin:12px 0}
+.sum{font-weight:bold;margin:12px 0}
+</style>
 </head>
 <body>
 <h1>체중 감량과 어깨·등 풀기 운동 루틴</h1>
 <p>피트니스 센터 운동 루틴을 정리하는 개인 학습 사이트 · 합성/공개 데이터 사용 · 개인 학습 프로젝트</p>
+<div class="note">합성 자료 · 의료 조언 아님 · 참고해 만든 일반 루틴(개인 기록 아님)</div>
+<div id="sum" class="sum">불러오는 중…</div>
+<table>
+<thead><tr><th>요일</th><th>부위</th><th>목표</th><th>기구</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+<details><summary>제외·중복된 줄과 이유</summary><ul id="skipped"></ul></details>
+<script>
+// 규칙은 docs/data/RULES.md 와 같다.
+var DAYS = ["월","화","수","목","금","토","일"];
+var PARTS = ["상체","하체","어깨","등","전신","유산소"];
+var GOALS = ["감량","근력","스트레칭"];
+var BASE_DATE = "2026-11-22";
+
+fetch("data/routines.csv").then(function(r){ return r.text(); }).then(function(text){
+  var lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(function(l){ return l.trim() !== ""; });
+  lines.shift(); // 맨 윗줄(칸 이름)
+  var kept = [], seen = {}, skipped = [];
+  lines.forEach(function(line, i){
+    var c = line.split(",").map(function(s){ return s.trim(); });
+    var no = i + 2; // 파일의 줄 번호
+    var reason = "";
+    if (c.length < 4 || !c[0] || !c[1] || !c[2] || !c[3]) reason = "필수 칸이 비어 있음";
+    else if (DAYS.indexOf(c[0]) < 0) reason = "요일 형식 틀림";
+    else if (PARTS.indexOf(c[1]) < 0) reason = "부위가 보기에 없음";
+    else if (GOALS.indexOf(c[2]) < 0) reason = "목표가 보기에 없음";
+    if (reason) { skipped.push(no + "줄 제외: " + line + " (" + reason + ")"); return; }
+    var key = c[0] + "|" + c[3].toLowerCase();
+    if (seen[key]) { skipped.push(no + "줄 중복: " + line + " (요일과 기구가 같음, " + seen[key] + "줄을 남김)"); return; }
+    seen[key] = no;
+    kept.push(c);
+  });
+  var excluded = skipped.filter(function(s){ return s.indexOf("제외") > -1; }).length;
+  var dup = skipped.length - excluded;
+  kept.sort(function(a, b){
+    return DAYS.indexOf(a[0]) - DAYS.indexOf(b[0]) || PARTS.indexOf(a[1]) - PARTS.indexOf(b[1]);
+  });
+  var tb = document.getElementById("rows");
+  kept.forEach(function(c){
+    var tr = document.createElement("tr");
+    c.forEach(function(v){ var td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+  var ul = document.getElementById("skipped");
+  skipped.forEach(function(s){ var li = document.createElement("li"); li.textContent = s; ul.appendChild(li); });
+  if (!skipped.length) { var li = document.createElement("li"); li.textContent = "없음"; ul.appendChild(li); }
+  document.getElementById("sum").textContent =
+    "원천 " + lines.length + "건 → 제외 " + excluded + " · 중복 " + dup + " → 표시 " + kept.length + "건 · 기준일 " + BASE_DATE + " · 출처 합성 자료";
+}).catch(function(){
+  document.getElementById("sum").textContent = "데이터를 불러오지 못했습니다(data/routines.csv 확인).";
+});
+</script>
 </body>
 </html>
